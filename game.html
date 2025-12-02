@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Topic Mastery Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 12px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+      padding: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    h1, h2, h3 { margin: 0; }
+    .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .row {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .card {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+    .card.small { max-width: 340px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: #020617;
+      color: #e5e7eb;
+    }
+    input::placeholder { color: #6b7280; }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.primary {
+      background: #22c55e;
+      color: #052e16;
+    }
+    button.primary:hover { filter: brightness(1.1); }
+    button.ghost {
+      background: transparent;
+      color: #9ca3af;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+    button.ghost:hover {
+      background: rgba(148, 163, 184, 0.06);
+    }
+    .chip {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(148, 163, 184, 0.15);
+      margin: 4px 4px 0 0;
+    }
+    .question-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .option {
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .option:hover {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.8);
+    }
+    .status {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .results-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      margin-top: 5px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), transparent);
+      font-size: 14px;
+    }
+    .category { font-weight: 700; }
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.1);
+      color: #bbf7d0;
+      font-weight: 500;
+    }
+    footer {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6b7280;
+      align-items: center;
+    }
+    #startScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 20;
+    }
+    #startBox {
+      max-width: 520px;
+      width: 100%;
+      background: #020617;
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8);
+    }
+    #startBox h1 { font-size: 22px; }
+    #startBox ol {
+      margin: 8px 0 0 18px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    #startBox p {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    #startActions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    @media (max-width: 800px) {
+      .row { flex-direction: column; }
+      .card.small { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- START SCREEN -->
+  <div id="startScreen">
+    <div id="startBox">
+      <h1>Tech Topic Mastery Game</h1>
+      <p>An adaptive quiz to check how strong you are in different <b>technical topics</b>.</p>
+      <p><b>How it works:</b></p>
+      <ol>
+        <li>Enter topics you’ve learned (e.g., Python, Data Structures, Networks).</li>
+        <li>Each topic gets up to <b>5 questions</b> from Level 1 (easy) to Level 5 (hard).</li>
+        <li>If you get a question wrong, that topic stops immediately.</li>
+        <li>Score per topic decides whether you are Just Started, Weak, Strong, or Master.</li>
+      </ol>
+      <div id="startActions">
+        <button id="startGameBtn" class="primary">Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="app" id="gameContainer" style="display:none;">
+    <header>
+      <h1>Tech Topic Mastery Game</h1>
+      <div class="subtitle">
+        Enter technical topics you’ve studied. The game uses a decision-tree style question flow.
+      </div>
+    </header>
+
+    <div class="row">
+      <!-- LEFT: GAME -->
+      <div class="card">
+        <h3>1. Enter Topics</h3>
+        <div class="subtitle">
+          Examples: Python, Data Structures, Algorithms, Networks, Operating Systems, Databases, Machine Learning, Cybersecurity
+        </div>
+        <input id="topicsInput" type="text" placeholder="Python, Data Structures, Networks">
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="useSampleBtn" class="ghost">Use Sample Topics</button>
+          <button id="beginQuizBtn" class="primary">Begin Quiz</button>
+          <button id="resetBtn" class="ghost">Restart Game</button>
+        </div>
+        <div id="topicList" style="margin-top:6px;"></div>
+
+        <hr style="margin:10px 0;border-color:rgba(55,65,81,0.7);">
+
+        <h3>2. Question Area</h3>
+        <div id="questionArea" style="margin-top:6px;display:none;">
+          <div class="question-title" id="questionTitle"></div>
+          <div class="options" id="optionsContainer"></div>
+          <div class="status" id="statusText"></div>
+        </div>
+        <div id="noQuestionText" class="subtitle" style="margin-top:6px;">
+          Click <b>Begin Quiz</b> to start. The game will automatically move through your topics.
+        </div>
+      </div>
+
+      <!-- RIGHT: INFO & RESULTS -->
+      <div class="card small">
+        <h3>Game Info & Results</h3>
+        <div class="subtitle">
+          Legend:<br>
+          5 = Master • 4 = Strong • 3 = Average • 2 = Weak • 1 = Still learning • 0 = Just started
+        </div>
+        <div style="margin-top:10px;font-size:13px;">
+          <b>Overall Score:</b>
+          <span class="score-pill">
+            <span id="overallScore">0</span>/<span id="overallTotal">0</span> correct
+          </span>
+        </div>
+        <div id="resultsArea" style="margin-top:10px;display:none;">
+          <h4 style="margin:0 0 4px;">Per-topic Results</h4>
+          <div id="resultsList"></div>
+        </div>
+        <div class="subtitle" style="margin-top:10px;">
+          Game ends after all topics are evaluated.
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="downloadReportBtn" class="ghost">Download Report</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>Interactive HTML5 Game • Single file (HTML + CSS + JS)</div>
+      <div>Game Over = All topics evaluated</div>
+    </footer>
+  </div>
+
+  <script>
+    // ===== STATIC QUESTION BANK (NO BACKEND) =====
+    const QUESTION_BANK = {
+      "python": [
+        { q: "What does print() do in Python?",
+          opts: ["Stores data", "Displays output", "Stops program", "Creates variable"], a: 1 },
+        { q: "Which is immutable in Python?",
+          opts: ["list", "tuple", "set", "dict"], a: 1 },
+        { q: "List comprehension is mainly for:",
+          opts: ["Loops", "Concise list creation", "Classes", "Exceptions"], a: 1 },
+        { q: "Time complexity to access list[i] is:",
+          opts: ["O(1)", "O(n)", "O(log n)", "O(n log n)"], a: 0 },
+        { q: "GIL in CPython mainly affects:",
+          opts: ["Parallel threads", "Disk speed", "Network speed", "File formats"], a: 0 }
+      ],
+      "data structures": [
+        { q: "Which uses FIFO?",
+          opts: ["Stack", "Queue", "Tree", "Graph"], a: 1 },
+        { q: "Which is best for LIFO?",
+          opts: ["Queue", "Stack", "Heap", "Array"], a: 1 },
+        { q: "Search in balanced BST is:",
+          opts: ["O(1)", "O(log n)", "O(n)", "O(n log n)"], a: 1 },
+        { q: "Priority queue commonly uses:",
+          opts: ["Array", "Linked list", "Heap", "Hash table"], a: 2 },
+        { q: "Sparse graphs use:",
+          opts: ["Adjacency matrix", "Adjacency list", "Full matrix", "Bitmap"], a: 1 }
+      ],
+      "algorithms": [
+        { q: "Binary search uses:",
+          opts: ["Greedy", "Divide and conquer", "DP", "Backtracking"], a: 1 },
+        { q: "Average O(n log n) sort:",
+          opts: ["Bubble", "Insertion", "Merge", "Selection"], a: 2 },
+        { q: "Overlapping subproblems + optimal substructure:",
+          opts: ["Greedy", "Divide and conquer", "Dynamic programming", "Brute force"], a: 2 },
+        { q: "Worst-case quicksort:",
+          opts: ["O(n)", "O(n log n)", "O(n^2)", "O(log n)"], a: 2 },
+        { q: "Dijkstra is used for:",
+          opts: ["Sorting", "Shortest path (non-negative)", "Compression", "Encryption"], a: 1 }
+      ],
+      "networks": [
+        { q: "OSI model has:",
+          opts: ["5 layers", "7 layers", "3 layers", "10 layers"], a: 1 },
+        { q: "Connectionless protocol:",
+          opts: ["TCP", "UDP", "FTP", "SSH"], a: 1 },
+        { q: "IP stands for:",
+          opts: ["Internet Provider", "Internet Protocol", "Internal Process", "Interface Path"], a: 1 },
+        { q: "Which forwards between networks?",
+          opts: ["Switch", "Router", "Hub", "Repeater"], a: 1 },
+        { q: "Subnetting is used to:",
+          opts: ["Encrypt data", "Divide IP networks", "Speed up CPU", "Compress images"], a: 1 }
+      ],
+      "machine learning": [
+        { q: "Supervised learning example:",
+          opts: ["K-means", "Linear regression", "Apriori", "PCA"], a: 1 },
+        { q: "Overfitting means:",
+          opts: ["Good on train, bad on test", "Bad on both", "Never trains", "No data"], a: 0 },
+        { q: "Regression metric:",
+          opts: ["Accuracy", "MSE", "F1-score", "Recall"], a: 1 },
+        { q: "Gradient descent minimizes:",
+          opts: ["Batch size", "Features", "Loss function", "Classes"], a: 2 },
+        { q: "Sequential data model:",
+          opts: ["CNN", "RNN", "KNN", "Naive Bayes"], a: 1 }
+      ],
+      "databases": [
+        { q: "SQL stands for:",
+          opts: ["Simple Query List", "Structured Query Language", "Secure Query Logic", "Scripted Queue Language"], a: 1 },
+        { q: "NoSQL example:",
+          opts: ["Relational", "Document store", "Flat file", "CSV"], a: 1 },
+        { q: "Primary key is:",
+          opts: ["Secret code", "Unique row identifier", "Password", "Index on all columns"], a: 1 },
+        { q: "'A' in ACID:",
+          opts: ["Atomicity", "Availability", "Authentication", "Allocation"], a: 0 },
+        { q: "Good for range queries:",
+          opts: ["Hash index", "B-tree index", "Bitmap index", "No index"], a: 1 }
+      ],
+      "operating systems": [
+        { q: "Main role of OS:",
+          opts: ["Design websites", "Manage hardware/resources", "Compile Java", "Translate languages"], a: 1 },
+        { q: "Scheduling algorithm:",
+          opts: ["Round Robin", "Dijkstra", "DFS", "Bellman-Ford"], a: 0 },
+        { q: "Virtual memory uses:",
+          opts: ["Disk as RAM extension", "Only RAM", "Internet", "GPU"], a: 0 },
+        { q: "Synchronization primitive:",
+          opts: ["Semaphore", "Pointer", "Struct", "Frame"], a: 0 },
+        { q: "Context switching:",
+          opts: ["Network switch", "CPU switches process/thread", "Monitor change", "Keyboard change"], a: 1 }
+      ],
+      "cybersecurity": [
+        { q: "Phishing is:",
+          opts: ["Protocol", "Fake messages to steal info", "Hashing", "Firewall"], a: 1 },
+        { q: "SSL/TLS provides:",
+          opts: ["Auth & encryption", "Compression", "Backup", "Virus removal"], a: 0 },
+        { q: "Good password practice:",
+          opts: ["Same everywhere", "Share with friends", "Long random password", "Write on monitor"], a: 2 },
+        { q: "2FA:",
+          opts: ["Two-Factor Authentication", "Two File Access", "Transfer File Auth", "Triple Factor Access"], a: 0 },
+        { q: "Modern hashing family:",
+          opts: ["MD5", "SHA-1", "SHA-2/SHA-3", "Plain text"], a: 2 }
+      ]
+    };
+
+    const CATEGORIES = [
+      "Just started",
+      "Still learning",
+      "Weak",
+      "Average",
+      "Strong",
+      "Master"
+    ];
+
+    let gameState = {
+      queue: [],
+      current: null,
+      finished: [],
+      totalCorrect: 0,
+      totalQuestions: 0
+    };
+
+    const startScreen = document.getElementById("startScreen");
+    const startGameBtn = document.getElementById("startGameBtn");
+    const gameContainer = document.getElementById("gameContainer");
+
+    const topicsInput = document.getElementById("topicsInput");
+    const useSampleBtn = document.getElementById("useSampleBtn");
+    const beginQuizBtn = document.getElementById("beginQuizBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const topicList = document.getElementById("topicList");
+    const questionArea = document.getElementById("questionArea");
+    const questionTitle = document.getElementById("questionTitle");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const statusText = document.getElementById("statusText");
+    const noQuestionText = document.getElementById("noQuestionText");
+
+    const resultsArea = document.getElementById("resultsArea");
+    const resultsList = document.getElementById("resultsList");
+    const overallScoreSpan = document.getElementById("overallScore");
+    const overallTotalSpan = document.getElementById("overallTotal");
+    const downloadReportBtn = document.getElementById("downloadReportBtn");
+
+    function normalizeTopic(t) {
+      return t.trim().toLowerCase();
+    }
+
+    function getTopicsFromInput() {
+      const raw = topicsInput.value.trim();
+      if (!raw) return [];
+      const arr = raw.split(",").map(normalizeTopic).filter(Boolean);
+      return [...new Set(arr)];
+    }
+
+    function showTopicChips(list) {
+      topicList.innerHTML = "";
+      list.forEach(t => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = t;
+        topicList.appendChild(chip);
+      });
+    }
+
+    function generateGenericBank(name) {
+      const base = name || "this topic";
+      return [
+        { q: `What is the basic idea of ${base}?`,
+          opts: ["A definition", "An implementation detail", "Deployment step", "Unrelated"], a: 0 },
+        { q: `After basics of ${base}, what next?`,
+          opts: ["Core operations & examples", "Skip practice", "Random topics", "Nothing"], a: 0 },
+        { q: `Which shows you are applying ${base}?`,
+          opts: ["Just reading", "Hands-on problems", "Ignoring it", "Closing IDE"], a: 1 },
+        { q: `What deepens knowledge in ${base}?`,
+          opts: ["Building projects", "Avoiding doubts", "Guessing only", "Never revising"], a: 0 },
+        { q: `Which looks advanced for ${base}?`,
+          opts: ["Integrating in bigger systems", "Forgetting after exam", "Using once", "Never trying"], a: 0 }
+      ];
+    }
+
+    function prepareQueue(topics) {
+      return topics.map(name => {
+        const key = normalizeTopic(name);
+        const bank = QUESTION_BANK[key] || generateGenericBank(name);
+        return { name, key, bank, index: 0, correctCount: 0 };
+      });
+    }
+
+    function updateOverallScoreDisplay() {
+      overallScoreSpan.textContent = gameState.totalCorrect;
+      overallTotalSpan.textContent = gameState.totalQuestions;
+    }
+
+    function startQuiz() {
+      const topics = getTopicsFromInput();
+      if (topics.length === 0) {
+        alert("Please enter at least one topic.");
+        return;
+      }
+      showTopicChips(topics);
+      gameState.queue = prepareQueue(topics);
+      gameState.finished = [];
+      gameState.totalCorrect = 0;
+      gameState.totalQuestions = topics.length * 5;
+      updateOverallScoreDisplay();
+
+      resultsArea.style.display = "none";
+      resultsList.innerHTML = "";
+      noQuestionText.style.display = "none";
+      questionArea.style.display = "block";
+
+      nextTopic();
+    }
+
+    function nextTopic() {
+      if (gameState.queue.length === 0) {
+        endGame();
+        return;
+      }
+      gameState.current = gameState.queue.shift();
+      showCurrentQuestion();
+    }
+
+    function showCurrentQuestion() {
+      const cur = gameState.current;
+      const idx = cur.index;
+      const qObj = cur.bank[idx];
+
+      questionTitle.textContent = `${cur.name} — Level ${idx + 1}: ${qObj.q}`;
+      optionsContainer.innerHTML = "";
+      qObj.opts.forEach((opt, i) => {
+        const btn = document.createElement("div");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.onclick = () => handleAnswer(i);
+        btn.tabIndex = 0;
+        btn.onkeydown = (e) => {
+          if (e.key === "Enter") handleAnswer(i);
+        };
+        optionsContainer.appendChild(btn);
+      });
+      statusText.textContent = `Topic: ${cur.name} • Correct so far: ${cur.correctCount}/5`;
+    }
+
+    function handleAnswer(selectedIndex) {
+      const cur = gameState.current;
+      const idx = cur.index;
+      const qObj = cur.bank[idx];
+      const isCorrect = (selectedIndex === qObj.a);
+
+      if (isCorrect) {
+        cur.correctCount += 1;
+        gameState.totalCorrect += 1;
+        updateOverallScoreDisplay();
+        if (cur.index < cur.bank.length - 1) {
+          cur.index += 1;
+          statusText.textContent = "Correct! Moving to next level...";
+          setTimeout(showCurrentQuestion, 600);
+        } else {
+          finalizeCurrentTopic();
+        }
+      } else {
+        statusText.textContent = "Wrong answer. This topic stops here.";
+        setTimeout(finalizeCurrentTopic, 700);
+      }
+    }
+
+    function finalizeCurrentTopic() {
+      const cur = gameState.current;
+      const score = cur.correctCount;
+      const category = CATEGORIES[score];
+      gameState.finished.push({ name: cur.name, score, category });
+      gameState.current = null;
+      nextTopic();
+    }
+
+    function endGame() {
+      questionArea.style.display = "none";
+      noQuestionText.style.display = "block";
+      noQuestionText.textContent =
+        "Game over! All topics evaluated. Scroll to Results to see your mastery.";
+      showResults();
+    }
+
+    function showResults() {
+      resultsArea.style.display = "block";
+      resultsList.innerHTML = "";
+      gameState.finished.forEach(r => {
+        const row = document.createElement("div");
+        row.className = "results-row";
+        const left = document.createElement("div");
+        left.innerHTML =
+          `<div><b>${r.name}</b></div>` +
+          `<div style="font-size:12px;color:#9ca3af;">Correct: ${r.score}/5</div>`;
+        const right = document.createElement("div");
+        right.className = "category";
+        right.textContent = r.category;
+        row.appendChild(left);
+        row.appendChild(right);
+        resultsList.appendChild(row);
+      });
+    }
+
+    function resetGame() {
+      topicsInput.value = "";
+      topicList.innerHTML = "";
+      questionArea.style.display = "none";
+      noQuestionText.style.display = "block";
+      noQuestionText.textContent =
+        "Click Begin Quiz to start. The game will automatically move through your topics.";
+
+      resultsArea.style.display = "none";
+      resultsList.innerHTML = "";
+      gameState = {
+        queue: [],
+        current: null,
+        finished: [],
+        totalCorrect: 0,
+        totalQuestions: 0
+      };
+      updateOverallScoreDisplay();
+    }
+
+    function downloadReport() {
+      if (gameState.finished.length === 0) {
+        alert("No results yet. Play the game first!");
+        return;
+      }
+      let text = "Tech Topic Mastery Game — Report\n\n";
+      text += `Total correct: ${gameState.totalCorrect}/${gameState.totalQuestions}\n\n`;
+      gameState.finished.forEach(r => {
+        text += `${r.name}: ${r.score}/5 — ${r.category}\n`;
+      });
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Tech_Topic_Mastery_Report.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // EVENTS
+    startGameBtn.addEventListener("click", () => {
+      startScreen.style.display = "none";
+      gameContainer.style.display = "block";
+    });
+
+    useSampleBtn.addEventListener("click", () => {
+      topicsInput.value =
+        "Python, Data Structures, Algorithms, Networks, Operating Systems, Databases, Machine Learning, Cybersecurity";
+      showTopicChips([
+        "python","data structures","algorithms","networks",
+        "operating systems","databases","machine learning","cybersecurity"
+      ]);
+    });
+
+    beginQuizBtn.addEventListener("click", startQuiz);
+    resetBtn.addEventListener("click", resetGame);
+    downloadReportBtn.addEventListener("click", downloadReport);
+
+    topicsInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startQuiz();
+    });
+  </script>
+</body>
+</html>
